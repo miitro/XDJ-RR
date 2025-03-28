@@ -2,15 +2,15 @@
 
 echo "### apl_start script ###"
 
+appPath="/root/pdj/rbp"
+
 # デバッグ設定 (リリース版では必ず 0にすること)
 apl_debug=0		# core dump を USBメモリへ出力. inetd有効
 
 telnet_daemon=0
 telnet_debug=0		# printf を telnetに出力
 
-appPath="/root/pdj/rbp"
-
-if [ $telnet_daemon -eq 0 -a $telnet_debug -eq 1 ]; then
+if [ $telnet_daemon -eq 0 ]; then
 	telnet_debug=0
 fi
 
@@ -26,10 +26,12 @@ fi
 # 以降、カレントディレクトリが /root/pdj であることを前提とする.
 cd /root/pdj
 
+eval `bootmod`
+rootfs=`fw_printenv -n rootfs`
+
 ########################
 #  SDアップデート処理  #
 ########################
-eval `bootmod`
 . ./sd_update.sh
 sd_update
 
@@ -46,23 +48,33 @@ setup_release
 version=`./str2hex $release`
 echo "version = $version"	# for debug
 
+# SerialNumber 情報設定
+serial_num=`fw_printenv -n serial_num`
+echo "serial_num = $serial_num"	# for debug
+
 # USB-B Audio入力対応
 if ! lsmod | grep -q g_pmulti
 then
-	modprobe g_pmulti bcdDevice=$version
+	if [ "$version" -a "$serial_num" ]; then
+		modprobe g_pmulti bcdDevice=$version iSerialNumber=$serial_num
+	elif [ "$version" ]; then
+		modprobe g_pmulti bcdDevice=$version
+	elif [ "$serial_num" ]; then
+		modprobe g_pmulti iSerialNumber=$serial_num
+	else
+		modprobe g_pmulti
+	fi
 fi
 # USB-B 挿入からアプリ通知までの時間を設定する.
 echo 1000 > /sys/module/g_pmulti/parameters/notify_delay_msec
 
 # FUSE
-if ! lsmod | grep -q fuse
-then
+if ! lsmod | grep -q fuse; then
 	modprobe fuse
 fi
 
 # /root/settings (データ保存用フォルダ), gui マウント
 . ./ubifs_funcs.sh
-rootfs=`fw_printenv -n rootfs`
 if [ "$rootfs" != "nfs" ]; then
 	# NAND ブートの場合 settings, gui パーティションを ubifs マウントする.
 	if [ "$BOOTMODE" = "NAND" ]; then
@@ -102,7 +114,7 @@ fi
 #/etc/sysctrl.confに書いても効かなかったためココに記述
 sysctl -w kernel.sched_rt_runtime_us=-1
 
-# fileの書き込み遅延時間設定 1/100sec単位。500(=5sec)
+# fileの書き込み遅延時間設定 1/100sec単位
 sysctl -w vm.dirty_writeback_centisecs=500
 sysctl -w vm.dirty_expire_centisecs=500
 
@@ -135,7 +147,7 @@ echo "$release [$rev_string]" > /tmp/smdj2.rev
 #/sbin/systemd -B
 
 
-# core dump 設定
+# core dump 出力先設定
 if [ "$BOOTMODE" = "NAND" -a $apl_debug -eq 1 ]; then
 	echo "set core /media/usb1/sda1/ for debug"
 	usb_core_timeout=10
@@ -166,6 +178,7 @@ else
 	ulimit -c 0
 fi
 
+
 ##################
 #  apl起動 処理  #
 ##################
@@ -173,13 +186,21 @@ fi
 # USB HUB 設定
 . ./setup_usbhub.sh
 
-# aplstart == off の場合は apl を起動しない.
+no_reset_usbbhub=`fw_printenv -n no_reset_usbbhub`
+echo "no_reset_usbbhub = $no_reset_usbbhub"	# for debug
+
+# aplstart != on の場合は apl を起動しない.
 aplstart=`fw_printenv -n aplstart`
-if [ "$aplstart" = "off" ]; then
+if [ "$aplstart" != "on" ]; then
 	echo "aplstart is $aplstart for debug"
 
 	# USB-A HUB 設定
 	./setup_usbhub_a_retry &
+
+	# USB-B HUB 設定
+	if [ "$no_reset_usbbhub" != "1" ]; then
+		setup_usbhub_b
+	fi
 
 	exit 0
 fi
@@ -197,36 +218,31 @@ if [ $telnet_debug -eq 1 ]; then
 	exec 2>&1
 fi
 
-# dummy auto play
-#. ./auto_play.sh
-#auto_play
 
 # apl 起動
 echo "### Application Start!! ###"
 #/root/pdj/applog &			# TODO:
-if [ -x $appPath ]; then
+if [ -x ${appPath} ]; then
 	if [ "$rootfs" = "nfs" ]; then
-		$appPath -a &		# AutoIP off
+		${appPath} -a &		# AutoIP off
 	else
-		$appPath &
+		${appPath} &
 	fi
+else
+	echo "${appPath} is not found."
 fi
-
 
 # USB-A HUB 設定
 # USB-A HUB を認識しない生産トラブル対策のため、
 # 初期化処理をアプリ起動後に移動し、認識失敗時はリトライさせる.
-#setup_usbhub_a
 ./setup_usbhub_a_retry &
 
 # USB-B HUB 設定
 # Windows PC に USB-B 接続状態のまま起動するとフリーズする (#27401) 対策ため、
 # アプリ起動後に設定する.
-if [ "$rootfs" != "nfs" ]; then
-	sleep 5
+if [ "$no_reset_usbbhub" != "1" ]; then
+#	sleep 5
 	setup_usbhub_b
 fi
 
-if [ $apl_debug -eq 0 ]; then
-	exit 0
-fi
+exit 0

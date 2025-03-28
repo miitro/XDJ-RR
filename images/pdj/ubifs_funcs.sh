@@ -7,8 +7,7 @@ initialize_ubifs()
 	# ギャングライター書込後の初回起動時のみ UBIFS 領域をフォーマットして書き込む
 	ubifs_formatted=`fw_printenv -n ubifs_formatted`
 
-	if [ "$ubifs_formatted" = "false" ]
-	then
+	if [ "$ubifs_formatted" != "true" ]; then
 		echo "### initialize_ubifs() ###"
 
 		mkdir -p /mnt/flash
@@ -19,26 +18,36 @@ initialize_ubifs()
 		echo "mount -t tmpfs return [$result_mount_tmpfs]"
 
 		# gui (mtd10) <- gui.tar.gz (mtd9)
-		echo "nanddump mtd9 enter"
-		nanddump -q --omitoob --bb=skipbad --length=0x800000 -f /mnt/flash/gui.tar.gz /dev/mtd9
+		echo "nanddump -q --omitoob --bb=skipbad --length=0x800000 -f /mnt/flash/gui.tar.gz /dev/mtd9 enter"
+		nanddump -q --omitoob --bb=skipbad --length=0x800000 -f /mnt/flash/gui.tar.gz /dev/mtd9		# 8MB
 		result_nanddump=$?
-		echo "nanddump mtd9 return [$result_nanddump]"
-		echo "format_ubifs gui enter"
+		echo "nanddump -q --omitoob --bb=skipbad --length=0x800000 -f /mnt/flash/gui.tar.gz /dev/mtd9 return [$result_nanddump]"
+		sync
+#		ls -Fla /mnt/flash/gui.tar.gz
+		echo "format_ubifs gui /dev/mtd10 /mnt/flash/gui.tar.gz enter"
 		format_ubifs gui /dev/mtd10 /mnt/flash/gui.tar.gz
 		result_gui=$?
-		echo "format_ubifs gui return [$result_gui]"
+		echo "format_ubifs gui /dev/mtd10 /mnt/flash/gui.tar.gz return [$result_gui]"
 		rm -f /mnt/flash/gui.tar.gz
+		sync
 
 		# settings (mtd6)
-		echo "format_ubifs settings enter"
+		echo "format_ubifs settings /dev/mtd6 enter"
 		format_ubifs settings /dev/mtd6
 		result_settings=$?
-		echo "format_ubifs settings return [$result_settings]"
+		echo "format_ubifs settings /dev/mtd6 return [$result_settings]"
 #		# settings (mtd6) <- settings.tar.gz (mtd8)
-#		nanddump -q --omitoob --bb=skipbad --length=0x20000 -f /mnt/flash/settings.tar.gz /dev/mtd8
+#		echo "nanddump -q --omitoob --bb=skipbad --length=0x20000 -f /mnt/flash/settings.tar.gz /dev/mtd8 enter"
+#		nanddump -q --omitoob --bb=skipbad --length=0x20000 -f /mnt/flash/settings.tar.gz /dev/mtd8	# 128KB
+#		result_nanddump=$?
+#		echo "nanddump -q --omitoob --bb=skipbad --length=0x20000 -f /mnt/flash/settings.tar.gz /dev/mtd8 return [$result_nanddump]"
+#		sync
+#		echo "format_ubifs settings /dev/mtd6 /mnt/flash/settings.tar.gz enter"
 #		format_ubifs settings /dev/mtd6 /mnt/flash/settings.tar.gz
 #		result_settings=$?
+#		echo "format_ubifs settings /dev/mtd6 /mnt/flash/settings.tar.gz return [$result_settings]"
 #		rm -f /mnt/flash/settings.tar.gz
+		sync
 
 		if [ $result_gui -eq 0 ] && [ $result_settings -eq 0 ]
 		then
