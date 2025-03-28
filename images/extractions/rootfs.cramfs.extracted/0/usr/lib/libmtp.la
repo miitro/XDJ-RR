@@ -17,7 +17,7 @@ old_library='libmtp.a'
 inherited_linker_flags=' -pthread'
 
 # Libraries that this one depends upon.
-dependency_libs=' -L/home/iMX6/ltib/rootfs/lib -L/home/iMX6/ltib/rootfs/usr/lib -liconv /home/pioneerdj/platform/tools/libusb-1.0/libusb-1.0.9/install/lib/libusb-1.0.la -lrt'
+dependency_libs=' -L/home/iMX6/ltib/rootfs/lib -L/home/iMX6/ltib/rootfs/usr/lib -liconv /home/pioneerdj/project_rr/platform/tools/libusb-1.0/libusb-1.0.9/install/lib/libusb-1.0.la -lrt'
 
 # Names of additional weak libraries provided by this library
 weak_library_names=''
@@ -38,4 +38,4 @@ dlopen=''
 dlpreopen=''
 
 # Directory that this library needs to be installed in:
-libdir='/home/pioneerdj/xdj-rr/platform/tools/libmtp/libmtp-1.1.13/install/lib'
+libdir='/home/pioneerdj/project_rr/platform/tools/libmtp/libmtp-1.1.13/install/lib'

@@ -1,1 +1,1 @@
-/sbin/e2fsck
+/sbin/fsck.ext2

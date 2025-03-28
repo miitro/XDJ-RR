@@ -30,8 +30,8 @@ path2=${mountp}/.PIONEER	# hfsplus
 if [ ${hfsplus} -eq 1 ]; then
 	if [ ! -d ${path2} ]; then
 		#echo "${path2} is not found."
-		mkdir -p ${path2}
-		sync
+#		mkdir -p ${path2}
+#		sync
 		exit 1
 	fi
 	#echo "path2=${path2} is found."

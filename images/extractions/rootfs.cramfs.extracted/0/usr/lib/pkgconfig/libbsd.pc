@@ -1,4 +1,4 @@
-prefix=/home/pioneerdj/platform/tools/libbsd/libbsd-0.6.0/install
+prefix=/home/pioneerdj/project_rr/platform/tools/libbsd/libbsd-0.6.0/install
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
 includedir=${prefix}/include

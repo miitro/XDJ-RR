@@ -4,8 +4,8 @@
 
 datarootdir=/usr/share
 DIR="${DIR-${datarootdir}/ss}"
-SS_DIR="/home/pioneerdj/iMX6/ltib/rpm/BUILD/e2fsprogs-1.41.4/lib/ss"
-AWK=mawk
+SS_DIR="/home/pioneerdj/project_rr/iMX6/ltib/rpm/BUILD/e2fsprogs-1.41.4/lib/ss"
+AWK=gawk
 SED=/bin/sed
 
 for as_var in \

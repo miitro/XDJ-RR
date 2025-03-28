@@ -3,9 +3,9 @@
 #
 
 datarootdir=/usr/share
-AWK=mawk
+AWK=gawk
 DIR="${DIR-${datarootdir}/et}"
-ET_DIR="/home/pioneerdj/iMX6/ltib/rpm/BUILD/e2fsprogs-1.41.4/lib/et"
+ET_DIR="/home/pioneerdj/project_rr/iMX6/ltib/rpm/BUILD/e2fsprogs-1.41.4/lib/et"
 
 if test "$1" = "--build-tree" ; then
     shift;
