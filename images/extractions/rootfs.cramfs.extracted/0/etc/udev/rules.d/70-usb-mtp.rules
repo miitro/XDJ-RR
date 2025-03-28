@@ -1,0 +1,15 @@
+SUBSYSTEM!="usb", GOTO="usb_mtp_end"
+ENV{MAJOR}!="?*", GOTO="usb_mtp_end"
+KERNEL=="hidraw*", GOTO="usb_mtp_end"
+KERNELS=="1-1*", ENV{usb_slot}="usbmtp1"
+KERNELS=="2-1.1*", ENV{usb_slot}="usbmtp2"
+KERNELS=="2-1.2*", ENV{usb_slot}="usbmtp1"
+
+### connect ###
+ACTION=="add", ENV{ID_MTP_DEVICE}=="1", ENV{ID_MEDIA_PLAYER}=="1", RUN+="/bin/sh -c '/bin/echo -n connect%E{DEVNUM} > /proc/udev_%E{usb_slot}'", GOTO="usb_mtp_end"
+
+### disconnect ###
+#ACTION=="remove", RUN+="/bin/sh -c '/bin/echo -n disconnect%E{DEVNUM} > /proc/udev_%E{usb_slot}'", GOTO="usb_mtp_end"
+ACTION=="mtp_remove", RUN+="/bin/sh -c '/bin/echo -n mtpdisconnect%E{DEVNUM} > /proc/udev_%E{usb_slot}'", GOTO="usb_mtp_end"
+
+LABEL="usb_mtp_end"

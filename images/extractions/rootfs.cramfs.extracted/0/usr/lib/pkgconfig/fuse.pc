@@ -1,0 +1,11 @@
+prefix=/home/iMX6/ltib/rootfs/usr
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: fuse
+Description: Filesystem in Userspace
+Version: 2.9.3
+Libs: -L${libdir} -lfuse -pthread -liconv
+Libs.private: -lrt -ldl  -L/home/iMX6/ltib/rootfs/usr/lib -liconv -R/home/iMX6/ltib/rootfs/usr/lib
+Cflags: -I${includedir}/fuse -D_FILE_OFFSET_BITS=64

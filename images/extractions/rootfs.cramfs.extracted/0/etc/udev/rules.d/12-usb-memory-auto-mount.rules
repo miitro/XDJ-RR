@@ -1,0 +1,21 @@
+KERNEL!="sd*", GOTO="media_auto_mount_end"
+KERNELS=="1-1*", ENV{usb_slot}="usb1"
+KERNELS=="2-1.1*", ENV{usb_slot}="usb2"
+KERNELS=="2-1.2*", ENV{usb_slot}="usb1"
+
+ACTION=="add", SYMLINK+="usb-%k", GROUP="users", NAME="%k"
+
+### invoke io-scheduler setting script ###
+SUBSYSTEM=="block",ACTION=="add", ENV{DEVTYPE}=="disk", RUN+="/etc/udev/rules.d/usb-iosched.sh %k"
+
+### mount ###
+ACTION=="add", PROGRAM="/lib/udev/vol_id -t %N", RESULT=="vfat", RUN+="/bin/sh -c '/bin/mkdir -p /media/%E{usb_slot}/%k; /bin/mount -t vfat -o flush,rw,dmask=000,fmask=000,shortname=mixed,utf8,noatime,usefree /dev/%k /media/%E{usb_slot}/%k; /root/pdj/decrypt_autoexec.sh /media/%E{usb_slot}/%k; /bin/echo -n mount /media/%E{usb_slot}/%k > /proc/udev_%E{usb_slot}'", GOTO="media_auto_mount_end"
+ACTION=="add", PROGRAM="/lib/udev/vol_id -t %N", RESULT=="hfsplus", RUN+="/bin/sh -c '/bin/mkdir -p /media/%E{usb_slot}/%k; /sbin/fsck.hfsplus -c 4m -f /dev/%k; /bin/mount -t hfsplus -o force,rw,noatime /dev/%k /media/%E{usb_slot}/%k; /root/pdj/decrypt_autoexec.sh /media/%E{usb_slot}/%k; /bin/echo -n mount /media/%E{usb_slot}/%k > /proc/udev_%E{usb_slot}'", GOTO="media_auto_mount_end"
+#ACTION=="add", PROGRAM="/lib/udev/vol_id -t %N", RESULT=="ext2", RUN+="/bin/sh -c '/bin/mkdir -p /media/%E{usb_slot}/%k; /bin/mount -t ext2 -o rw /dev/%k /media/%E{usb_slot}/%k; /root/pdj/decrypt_autoexec.sh /media/%E{usb_slot}/%k'", GOTO="media_auto_mount_end"
+#ACTION=="add", PROGRAM="/lib/udev/vol_id -t %N", RESULT=="ext3", RUN+="/bin/sh -c '/bin/mkdir -p /media/%E{usb_slot}/%k; /bin/mount -t ext3 -o rw /dev/%k /media/%E{usb_slot}/%k; /root/pdj/decrypt_autoexec.sh /media/%E{usb_slot}/%k'", GOTO="media_auto_mount_end"
+#ACTION=="add", PROGRAM="/lib/udev/vol_id -t %N", RESULT=="ext4", RUN+="/bin/sh -c '/bin/mkdir -p /media/%E{usb_slot}/%k; /bin/mount -t ext4 -o rw /dev/%k /media/%E{usb_slot}/%k; /root/pdj/decrypt_autoexec.sh /media/%E{usb_slot}/%k'", GOTO="media_auto_mount_end"
+
+### unmount ###
+ACTION=="remove", RUN+="/bin/sh -c '/bin/umount -l /media/%E{usb_slot}/%k; /bin/rmdir /media/%E{usb_slot}/%k; /bin/echo -n umount /media/%E{usb_slot}/%k > /proc/udev_%E{usb_slot}'"
+
+LABEL="media_auto_mount_end"

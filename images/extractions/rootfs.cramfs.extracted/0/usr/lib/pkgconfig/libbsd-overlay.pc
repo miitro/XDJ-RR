@@ -1,0 +1,11 @@
+prefix=/home/pioneerdj/platform/tools/libbsd/libbsd-0.6.0/install
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: libbsd
+Description: Utility functions from BSD systems (overlay)
+Version: 0.6.0
+URL: http://libbsd.freedesktop.org/
+Libs: -L${libdir} -lbsd
+Cflags: -isystem ${includedir}/bsd -DLIBBSD_OVERLAY

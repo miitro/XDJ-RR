@@ -1,0 +1,14 @@
+#!/bin/sh
+
+echo "#### with_core_app ###"
+
+rootfs=`fw_printenv -n rootfs`
+
+if [ "$rootfs" = "nfs" ]
+then
+	sysctl -w kernel.core_uses_pid=1
+	sysctl -w kernel.core_pattern=/root/core_%e_%p_%s
+	ulimit -c unlimited
+fi
+
+/root/pdj/app

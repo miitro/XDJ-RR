@@ -1,0 +1,27 @@
+#!/bin/sh
+
+# setup_usbhub_a_retry
+
+. ./setup_usbhub.sh
+
+sec=4
+retry=20
+
+while :
+do
+	setup_usbhub_a
+	sleep $sec
+
+	if dmesg | grep '2-1:1.0: USB hub found'; then
+		echo "### USB-A hub found. ###"
+		break
+	else
+		echo "### USB-A hub is not found. ($retry) ###"
+		if [ $retry -eq 0 ]; then
+			break
+		fi
+		retry=`expr $retry - 1`
+	fi
+
+	reset_usbhub_a
+done

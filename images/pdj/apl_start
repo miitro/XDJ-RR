@@ -1,0 +1,232 @@
+#!/bin/sh
+
+echo "### apl_start script ###"
+
+# デバッグ設定 (リリース版では必ず 0にすること)
+apl_debug=0		# core dump を USBメモリへ出力. inetd有効
+
+telnet_daemon=0
+telnet_debug=0		# printf を telnetに出力
+
+appPath="/root/pdj/rbp"
+
+if [ $telnet_daemon -eq 0 -a $telnet_debug -eq 1 ]; then
+	telnet_debug=0
+fi
+
+assign_kswapd_core0=1	# 1 kswapdを強制的にコア0にする
+
+# マルチコア判別
+if [ -z "`cat /proc/cpuinfo | grep processor | grep 1`" ]; then
+	multi_core=0
+else
+	multi_core=1
+fi
+
+# 以降、カレントディレクトリが /root/pdj であることを前提とする.
+cd /root/pdj
+
+########################
+#  SDアップデート処理  #
+########################
+eval `bootmod`
+. ./sd_update.sh
+sd_update
+
+####################
+#  apl起動 前処理  #
+####################
+
+# 日付を設定する.
+date -s "2018-01-01 00:00:00"
+
+# バージョン情報設定
+. ./setup_revision.sh
+setup_release
+version=`./str2hex $release`
+echo "version = $version"	# for debug
+
+# USB-B Audio入力対応
+if ! lsmod | grep -q g_pmulti
+then
+	modprobe g_pmulti bcdDevice=$version
+fi
+# USB-B 挿入からアプリ通知までの時間を設定する.
+echo 1000 > /sys/module/g_pmulti/parameters/notify_delay_msec
+
+# FUSE
+if ! lsmod | grep -q fuse
+then
+	modprobe fuse
+fi
+
+# /root/settings (データ保存用フォルダ), gui マウント
+. ./ubifs_funcs.sh
+rootfs=`fw_printenv -n rootfs`
+if [ "$rootfs" != "nfs" ]; then
+	# NAND ブートの場合 settings, gui パーティションを ubifs マウントする.
+	if [ "$BOOTMODE" = "NAND" ]; then
+		initialize_ubifs
+
+		mkdir -p /root/settings
+		mount_ubifs settings 6 /root/settings
+
+		mkdir -p /root/gui
+		mount_ubifs gui 10 /root/gui
+
+		echo 1 > /tmp/nand_mount	# TODO:
+	fi
+# SD ブートの場合 sd の /root/settings, gui をそのまま使用する.
+#	if [ "$BOOTMODE" = "MMC" ]; then
+#		mkdir -p /root/settings
+#		mkdir -p /mnt/sdcard/root/settings
+#		mount -o bind /mnt/sdcard/root/settings /root/settings
+#		# GUIリソースはNAND内の物を使う
+#		mount_ubifs gui 10 /root/gui
+#	fi
+#else
+# rootfs = NFS の場合 NFS の /root/settings, gui をそのまま使用する.
+fi
+
+# ハード割込コア割当
+if [ $multi_core -eq 1 ]; then
+	echo "set irq_smp_affinity"
+	/root/pdj/irq_smp_affinity /proc/interrupts
+	if [ $assign_kswapd_core0 -eq 1 ]; then
+		echo "set kswapd core0"
+		taskset -p 0x00000001 `pgrep kswapd0`
+	fi
+fi
+
+# RT Throttle解除
+#/etc/sysctrl.confに書いても効かなかったためココに記述
+sysctl -w kernel.sched_rt_runtime_us=-1
+
+# fileの書き込み遅延時間設定 1/100sec単位。500(=5sec)
+sysctl -w vm.dirty_writeback_centisecs=500
+sysctl -w vm.dirty_expire_centisecs=500
+
+
+# これ以降の処理は、上記遅延書き込み設定の影響を受けることを考慮すること!!
+
+
+# telnetd (リリース版では無効化すること)
+if [ $telnet_daemon -eq 1 ]; then
+	taskset 0x1 telnetd
+fi
+
+# DeviceSQL の stream daemon のインストールパスを設定する.
+export EDB_BIN=/usr/bin
+if [ -x /usr/bin/edb_streamd ]; then
+	taskset 0x1 /usr/bin/edb_streamd &
+fi
+
+
+# バージョン情報を tmp ファイルに出力する.
+if [ "$BOOTMODE" = "NAND" ]; then
+	setup_revisions_nand
+else
+	setup_revisions_sd
+fi
+rev_string="$rev_system:$rev_apl"
+echo "$release" > /tmp/smdj.rev
+echo "$release [$rev_string]" > /tmp/smdj2.rev
+
+#/sbin/systemd -B
+
+
+# core dump 設定
+if [ "$BOOTMODE" = "NAND" -a $apl_debug -eq 1 ]; then
+	echo "set core /media/usb1/sda1/ for debug"
+	usb_core_timeout=10
+	count=0
+	while :
+	do
+		if [ -e /media/usb1/sda1 ]; then
+			echo "find /media/usb1/sda1"
+			sysctl -w kernel.core_uses_pid=1
+			sysctl -w kernel.core_pattern=/media/usb1/sda1/core_%e_%p_%s
+			ulimit -c unlimited
+			break
+		fi
+
+		sleep 1
+		count=$((count+1))
+
+		if [ $count -gt $usb_core_timeout ]; then
+			echo "...time out. /media/usb1/sda1 is not found."
+			break
+		fi
+	done
+elif [ "$rootfs" = "nfs" ]; then
+	sysctl -w kernel.core_uses_pid=1
+	sysctl -w kernel.core_pattern=/root/core_%e_%p_%s
+	ulimit -c unlimited
+else
+	ulimit -c 0
+fi
+
+##################
+#  apl起動 処理  #
+##################
+
+# USB HUB 設定
+. ./setup_usbhub.sh
+
+# aplstart == off の場合は apl を起動しない.
+aplstart=`fw_printenv -n aplstart`
+if [ "$aplstart" = "off" ]; then
+	echo "aplstart is $aplstart for debug"
+
+	# USB-A HUB 設定
+	./setup_usbhub_a_retry &
+
+	exit 0
+fi
+
+# telnet client 側にログを出す処理
+# client 側で以下を実行するとログが見れる
+# tee /tmp/log_out < /tmp/std_out &
+if [ $telnet_debug -eq 1 ]; then
+	echo "---- Start Telnet Log ---"
+	mknod /tmp/std_out p
+	mknod /tmp/log_out p
+	logger </tmp/log_out &
+	tee /tmp/log_out < /tmp/std_out > /dev/null &
+	exec > /tmp/std_out
+	exec 2>&1
+fi
+
+# dummy auto play
+#. ./auto_play.sh
+#auto_play
+
+# apl 起動
+echo "### Application Start!! ###"
+#/root/pdj/applog &			# TODO:
+if [ -x $appPath ]; then
+	if [ "$rootfs" = "nfs" ]; then
+		$appPath -a &		# AutoIP off
+	else
+		$appPath &
+	fi
+fi
+
+
+# USB-A HUB 設定
+# USB-A HUB を認識しない生産トラブル対策のため、
+# 初期化処理をアプリ起動後に移動し、認識失敗時はリトライさせる.
+#setup_usbhub_a
+./setup_usbhub_a_retry &
+
+# USB-B HUB 設定
+# Windows PC に USB-B 接続状態のまま起動するとフリーズする (#27401) 対策ため、
+# アプリ起動後に設定する.
+if [ "$rootfs" != "nfs" ]; then
+	sleep 5
+	setup_usbhub_b
+fi
+
+if [ $apl_debug -eq 0 ]; then
+	exit 0
+fi

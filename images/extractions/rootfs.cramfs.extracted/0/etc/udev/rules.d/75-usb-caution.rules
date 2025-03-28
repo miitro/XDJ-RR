@@ -1,0 +1,21 @@
+SUBSYSTEM!="usb", GOTO="usb_caution_end"
+ACTION!="change", GOTO="usb_caution_end"
+
+KERNELS=="2-1.1", ENV{CONNECT}=="1", RUN+="/bin/sh -c '/bin/echo -n connect > /proc/udev_usbctn2'", GOTO="usb_caution_end"
+KERNELS=="2-1.2", ENV{CONNECT}=="1", RUN+="/bin/sh -c '/bin/echo -n connect > /proc/udev_usbctn1'", GOTO="usb_caution_end"
+KERNELS=="2-1.1", ENV{DISCONNECT}=="1", RUN+="/bin/sh -c '/bin/echo -n disconnect > /proc/udev_usbctn2'", GOTO="usb_caution_end"
+KERNELS=="2-1.2", ENV{DISCONNECT}=="1", RUN+="/bin/sh -c '/bin/echo -n disconnect > /proc/udev_usbctn1'", GOTO="usb_caution_end"
+KERNELS=="2-1.1", ENV{HUBERR}=="1", RUN+="/bin/sh -c '/bin/echo -n huberr > /proc/udev_usbctn2'", GOTO="usb_caution_end"
+KERNELS=="2-1.2", ENV{HUBERR}=="1", RUN+="/bin/sh -c '/bin/echo -n huberr > /proc/udev_usbctn1'", GOTO="usb_caution_end"
+KERNELS=="2-1.1", ENV{UNSUPPORTED}=="1", RUN+="/bin/sh -c '/bin/echo -n unsupported > /proc/udev_usbctn2'", GOTO="usb_caution_end"
+KERNELS=="2-1.2", ENV{UNSUPPORTED}=="1", RUN+="/bin/sh -c '/bin/echo -n unsupported > /proc/udev_usbctn1'", GOTO="usb_caution_end"
+
+LABEL="usb_caution_end"
+
+DRIVER!="sd", GOTO="scsi_caution_end"
+ACTION!="change", GOTO="scsi_caution_end"
+
+KERNELS=="2-1.1", ENV{UNSUPPORTED}=="1", RUN+="/bin/sh -c '/bin/echo -n unsupported > /proc/udev_usbctn2'", GOTO="scsi_caution_end"
+KERNELS=="2-1.2", ENV{UNSUPPORTED}=="1", RUN+="/bin/sh -c '/bin/echo -n unsupported > /proc/udev_usbctn1'", GOTO="scsi_caution_end"
+
+LABEL="scsi_caution_end"

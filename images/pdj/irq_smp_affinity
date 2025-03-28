@@ -1,0 +1,52 @@
+#!/usr/bin/awk -f
+#
+# set IRQ SMP affinity
+# refer to /BUILD/linux-3.0.35/Documentation/IRQ-affinity.txt
+
+BEGIN {
+	LIMIT_IRQ = 160
+	RESERVED_IRQS = "39 40 43 71 122 131 139 144 145 146"
+	RESULT = 0
+
+	RESERVED_NUM = split(RESERVED_IRQS, RESERVED_IRQ, " ")
+	for (i = 1; i <= RESERVED_NUM; i++)
+		RESERVED_IRQ[i] = int(RESERVED_IRQ[i])
+
+	getline
+}
+
+{
+	if ($1 ~ /^[0-9].*:$/) {
+		irq = int(substr($1, 1, length($1) - 1))
+
+		if (irq > LIMIT_IRQ)
+			next
+
+		for (i = 1; i <= RESERVED_NUM; i++) {
+			if (irq == RESERVED_IRQ[i])
+				next
+		}
+
+		path = "/proc/irq/" irq "/smp_affinity"
+		if ($0 ~ /sdma/)
+			mask = 2
+		else
+			mask = 1
+
+		print mask > path
+		close(path)
+
+		getline result < path
+		result = int(result)
+		close(path)
+
+		if (mask != result) {
+			print "setting " path " is failed."
+			RESULT = 2
+		}
+	}
+}
+
+END {
+	exit RESULT
+}

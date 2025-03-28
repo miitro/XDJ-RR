@@ -1,0 +1,5 @@
+# Aliases extracted from modules themselves.
+alias devname:autofs autofs4
+alias char-major-10-235 autofs4
+alias devname:fuse fuse
+alias char-major-10-229 fuse

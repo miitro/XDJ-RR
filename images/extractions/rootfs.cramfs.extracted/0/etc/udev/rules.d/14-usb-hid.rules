@@ -1,0 +1,14 @@
+KERNEL!="hidraw*", GOTO="usb_hid_end"
+KERNEL=="hidraw0", ENV{minor}="0"
+KERNEL=="hidraw1", ENV{minor}="1"
+KERNELS=="1-1*", ENV{usb_slot}="usbhid1"
+KERNELS=="2-1.1*", ENV{usb_slot}="usbhid2"
+KERNELS=="2-1.2*", ENV{usb_slot}="usbhid1"
+
+### connect ###
+ACTION=="add", RUN+="/bin/sh -c '/bin/echo -n connect%E{minor} > /proc/udev_%E{usb_slot}'", GOTO="usb_hid_end"
+
+### disconnect ###
+ACTION=="remove", RUN+="/bin/sh -c '/bin/echo -n disconnect%E{minor} > /proc/udev_%E{usb_slot}'", GOTO="usb_hid_end"
+
+LABEL="usb_hid_end"
