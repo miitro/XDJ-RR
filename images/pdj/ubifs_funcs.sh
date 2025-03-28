@@ -58,18 +58,18 @@ mount_ubifs()
 	vol_no=$2
 	mount_point=$3
 
-	echo "### mount_ubifs ($vol_name, $vol_no, $mount_point) ###"
+	echo "### mount_ubifs (${vol_name}, ${vol_no}, ${mount_point}) ###"
 
-	echo "ubiattach $vol_no enter"
+	echo "ubiattach /dev/ubi_ctrl -m ${vol_no} -d ${vol_no} enter"
 	ubiattach /dev/ubi_ctrl -m ${vol_no} -d ${vol_no}
 	result_attach=$?
-	echo "ubiattach $vol_no return [$result_attach]"
+	echo "ubiattach /dev/ubi_ctrl -m ${vol_no} -d ${vol_no} return [$result_attach]"
 
 	# ubimkvolはアップデート時に実施済み
 	#ubimkvol /dev/ubi${vol_no} -N ${vol_name} -m
 
-	echo "mount -t ubifs $vol_no:$vol_name $mount_point enter"
+	echo "mount -t ubifs ubi${vol_no}:${vol_name} ${mount_point} enter"
 	mount -t ubifs ubi${vol_no}:${vol_name} ${mount_point}
 	result_mount_ubifs=$?
-	echo "mount -t ubifs $vol_no:$vol_name $mount_point return [$result_mount_ubifs]"
+	echo "mount -t ubifs ubi${vol_no}:${vol_name} ${mount_point} return [$result_mount_ubifs]"
 }

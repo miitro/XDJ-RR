@@ -134,55 +134,90 @@ setup_usbhub_b()
 	i2c_write_word $bus $slave 0x12 0x0901		# Language ID Low
 
 	i2c_write_word $bus $slave 0x13 0x1601		# Manufacturer String Length
-							# "Pioneer DJ Corporation" = 22(0x16)
+							# "AlphaTheta Corporation" = 22(0x16)
 	i2c_write_word $bus $slave 0x14 0x0f01		# Product String Length
 							# "Generic USB Hub" = 15(0x0f)
 	i2c_write_word $bus $slave 0x15 0x0010		# Serial String Length
 
 	# [0x16-0x53] Manufacturer String
-	# "Pioneer DJ Corporation"
-	i2c_write_word $bus $slave 0x16 0x5001		# 'P'
-	i2c_write_word $bus $slave 0x17 0x6901		# 'i'
-	i2c_write_word $bus $slave 0x18 0x6f01		# 'o'
-	i2c_write_word $bus $slave 0x19 0x5001		# 'n'
-	i2c_write_word $bus $slave 0x1a 0x6501		# 'e'
-	i2c_write_word $bus $slave 0x1b 0x6501		# 'e'
-	i2c_write_word $bus $slave 0x1c 0x7201		# 'r'
-	i2c_write_word $bus $slave 0x1d 0x2001		# ' '
-	i2c_write_word $bus $slave 0x1e 0x4401		# 'D'
-	i2c_write_word $bus $slave 0x1f 0x4a01		# 'J'
-	i2c_write_word $bus $slave 0x20 0x2001		# ' '
-	i2c_write_word $bus $slave 0x21 0x4301		# 'C'
-	i2c_write_word $bus $slave 0x22 0x6f01		# 'o'
-	i2c_write_word $bus $slave 0x23 0x7201		# 'r'
-	i2c_write_word $bus $slave 0x24 0x7001		# 'p'
-	i2c_write_word $bus $slave 0x25 0x6f01		# 'o'
-	i2c_write_word $bus $slave 0x26 0x7201		# 'r'
-	i2c_write_word $bus $slave 0x27 0x6101		# 'a'
-	i2c_write_word $bus $slave 0x28 0x7401		# 't'
-	i2c_write_word $bus $slave 0x29 0x6901		# 'i'
-	i2c_write_word $bus $slave 0x2a 0x6f01		# 'o'
-	i2c_write_word $bus $slave 0x2b 0x6e01		# 'n'
-	i2c_write_word $bus $slave 0x2c 0x0001		#
+	# "AlphaTheta Corporation"
+	i2c_write_word $bus $slave 0x16 0x4101		# 'A'
+	i2c_write_word $bus $slave 0x17 0x0001		# 
+	i2c_write_word $bus $slave 0x18 0x6c01		# 'l'
+	i2c_write_word $bus $slave 0x19 0x0001		# 
+	i2c_write_word $bus $slave 0x1a 0x7001		# 'p'
+	i2c_write_word $bus $slave 0x1b 0x0001		# 
+	i2c_write_word $bus $slave 0x1c 0x6801		# 'h'
+	i2c_write_word $bus $slave 0x1d 0x0001		# 
+	i2c_write_word $bus $slave 0x1e 0x6101		# 'a'
+	i2c_write_word $bus $slave 0x1f 0x0001		# 
+	i2c_write_word $bus $slave 0x20 0x5401		# 'T'
+	i2c_write_word $bus $slave 0x21 0x0001		# 
+	i2c_write_word $bus $slave 0x22 0x6801		# 'h'
+	i2c_write_word $bus $slave 0x23 0x0001		# 
+	i2c_write_word $bus $slave 0x24 0x6501		# 'e'
+	i2c_write_word $bus $slave 0x25 0x0001		# 
+	i2c_write_word $bus $slave 0x26 0x7401		# 't'
+	i2c_write_word $bus $slave 0x27 0x0001		# 
+	i2c_write_word $bus $slave 0x28 0x6101		# 'a'
+	i2c_write_word $bus $slave 0x29 0x0001		# 
+	i2c_write_word $bus $slave 0x2a 0x2001		# ' '
+	i2c_write_word $bus $slave 0x2b 0x0001		# 
+	i2c_write_word $bus $slave 0x2c 0x4301		# 'C'
+	i2c_write_word $bus $slave 0x2d 0x0001		# 
+	i2c_write_word $bus $slave 0x2e 0x6f01		# 'o'
+	i2c_write_word $bus $slave 0x2f 0x0001		# 
+	i2c_write_word $bus $slave 0x30 0x7201		# 'r'
+	i2c_write_word $bus $slave 0x31 0x0001		# 
+	i2c_write_word $bus $slave 0x32 0x7001		# 'p'
+	i2c_write_word $bus $slave 0x33 0x0001		# 
+	i2c_write_word $bus $slave 0x34 0x6f01		# 'o'
+	i2c_write_word $bus $slave 0x35 0x0001		# 
+	i2c_write_word $bus $slave 0x36 0x7201		# 'r'
+	i2c_write_word $bus $slave 0x37 0x0001		# 
+	i2c_write_word $bus $slave 0x38 0x6101		# 'a'
+	i2c_write_word $bus $slave 0x39 0x0001		# 
+	i2c_write_word $bus $slave 0x3a 0x7401		# 't'
+	i2c_write_word $bus $slave 0x3b 0x0001		# 
+	i2c_write_word $bus $slave 0x3c 0x6901		# 'i'
+	i2c_write_word $bus $slave 0x3d 0x0001		# 
+	i2c_write_word $bus $slave 0x3e 0x6f01		# 'o'
+	i2c_write_word $bus $slave 0x3f 0x0001		# 
+	i2c_write_word $bus $slave 0x40 0x6e01		# 'n'
+	i2c_write_word $bus $slave 0x41 0x0001		#
 
 	# [0x54-0x91] Product String
 	# "Generic USB Hub"
 	i2c_write_word $bus $slave 0x54 0x4701		# 'G'
-	i2c_write_word $bus $slave 0x55 0x6501		# 'e'
-	i2c_write_word $bus $slave 0x56 0x6e01		# 'n'
-	i2c_write_word $bus $slave 0x57 0x6501		# 'e'
-	i2c_write_word $bus $slave 0x58 0x7201		# 'r'
-	i2c_write_word $bus $slave 0x59 0x6901		# 'i'
-	i2c_write_word $bus $slave 0x5a 0x6301		# 'c'
-	i2c_write_word $bus $slave 0x5b 0x2001		# ' '
-	i2c_write_word $bus $slave 0x5c 0x5501		# 'U'
-	i2c_write_word $bus $slave 0x5d 0x5301		# 'S'
-	i2c_write_word $bus $slave 0x5e 0x4201		# 'B'
-	i2c_write_word $bus $slave 0x5f 0x2001		# ' '
-	i2c_write_word $bus $slave 0x60 0x4801		# 'H'
-	i2c_write_word $bus $slave 0x61 0x7501		# 'u'
-	i2c_write_word $bus $slave 0x62 0x6201		# 'b'
+	i2c_write_word $bus $slave 0x55 0x0001		#
+	i2c_write_word $bus $slave 0x56 0x6501		# 'e'
+	i2c_write_word $bus $slave 0x57 0x0001		#
+	i2c_write_word $bus $slave 0x58 0x6e01		# 'n'
+	i2c_write_word $bus $slave 0x59 0x0001		#
+	i2c_write_word $bus $slave 0x5a 0x6501		# 'e'
+	i2c_write_word $bus $slave 0x5b 0x0001		#
+	i2c_write_word $bus $slave 0x5c 0x7201		# 'r'
+	i2c_write_word $bus $slave 0x5d 0x0001		#
+	i2c_write_word $bus $slave 0x5e 0x6901		# 'i'
+	i2c_write_word $bus $slave 0x5f 0x0001		#
+	i2c_write_word $bus $slave 0x60 0x6301		# 'c'
+	i2c_write_word $bus $slave 0x61 0x0001		#
+	i2c_write_word $bus $slave 0x62 0x2001		# ' '
 	i2c_write_word $bus $slave 0x63 0x0001		#
+	i2c_write_word $bus $slave 0x64 0x5501		# 'U'
+	i2c_write_word $bus $slave 0x65 0x0001		#
+	i2c_write_word $bus $slave 0x66 0x5301		# 'S'
+	i2c_write_word $bus $slave 0x67 0x0001		#
+	i2c_write_word $bus $slave 0x68 0x4201		# 'B'
+	i2c_write_word $bus $slave 0x69 0x0001		#
+	i2c_write_word $bus $slave 0x6a 0x2001		# ' '
+	i2c_write_word $bus $slave 0x6b 0x0001		#
+	i2c_write_word $bus $slave 0x6c 0x4801		# 'H'
+	i2c_write_word $bus $slave 0x6d 0x0001		#
+	i2c_write_word $bus $slave 0x6e 0x7501		# 'u'
+	i2c_write_word $bus $slave 0x6f 0x0001		#
+	i2c_write_word $bus $slave 0x70 0x6201		# 'b'
+	i2c_write_word $bus $slave 0x71 0x0001		#
 
 	i2c_write_word $bus $slave 0x92 0x0001		# [0x92-0xcf] Serial String
 

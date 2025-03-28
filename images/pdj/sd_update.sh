@@ -8,26 +8,24 @@
 
 sd_update()
 {
-	workdir=nandupdate
+	upddir=nandupdate
 
-	if [ "$BOOTMODE" = "MMC" ]
-	then
+	if [ "$BOOTMODE" = "MMC" ]; then
 		# SDブートの場合、SDカードを /mnt/sdcard にマウントしなおす.
 		mkdir -p /mnt/sdcard
 		mount /dev/mmcblk0p1 /mnt/sdcard
 
-		# SDカードに $workdir がある場合、アップデートする.
-		if [ -d /mnt/sdcard/$workdir ]
-		then
-			echo "#### SD-Card update start !! ####"
-			cd /mnt/sdcard/$workdir
+		# SDカードに $upddir がある場合、アップデートする.
+		if [ -d /mnt/sdcard/$upddir ]; then
+			cd /mnt/sdcard/$upddir
 
+			echo "#### SD-Card update start !! ####"
 			./update SD 0
 
 			echo "#### SD-Card update end. ####"
 
 			cd /
-			umount /mnt/sdcard
+#			umount /mnt/sdcard
 
 			exit 0
 		fi

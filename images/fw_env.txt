@@ -8,11 +8,11 @@ kernel=uImage
 ethact=FEC0
 baudrate=115200
 jtag=on
-usblan=1
+hannstar_lcd=1
 mtdids=gpmi-nand
 partition=3M(boot),1M(bb1),1M(env),10M(kernel_a),10M(kernel_b),30M(rootfs),10M(settings),8M(pdj),5M(bb2),30M(core),40M(gui),102M(quickboot),5M(bb2),1M(bbt),0x500000@0x0(block_boot),0x4400000@0x500000(block_linux),-@0x0(block_all)
 ethaddr=00:04:9f:02:68:5e
-bootargs_base=setenv bootargs console=ttymxc0,115200 fec_mac=${ethaddr} mtdparts=${mtdids}:${partition} consoleblank=0 jtag=${jtag}
+bootargs_base=setenv bootargs console=ttymxc0,115200 fec_mac=${ethaddr} mtdparts=${mtdids}:${partition} consoleblank=0 hannstar_lcd=${hannstar_lcd} jtag=${jtag}
 serverip=192.168.1.101
 ipaddr=192.168.1.103
 netmask=255.255.255.0
